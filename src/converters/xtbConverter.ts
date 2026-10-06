@@ -253,7 +253,9 @@ export class XtbConverter extends AbstractConverter {
             // Interest does not have a security, so add those immediately.
             if (record.type.toLocaleLowerCase() === "interest") {
 
-                // Add interest record to export.
+                // Add interest record to export. The dataSource is omitted on
+                // purpose: Ghostfolio resolves it to MANUAL for interest records
+                // and rejects MANUAL activities with a free-text symbol.
                 result.activities.push({
                     accountId: process.env.GHOSTFOLIO_ACCOUNT_ID,
                     comment: `XTB ${record.id} - ${record.comment}`,
@@ -262,7 +264,6 @@ export class XtbConverter extends AbstractConverter {
                     type: GhostfolioOrderType[record.type],
                     unitPrice: Math.abs(record.amount),
                     currency: process.env.XTB_ACCOUNT_CURRENCY || "EUR",
-                    dataSource: "MANUAL",
                     date: date.format("YYYY-MM-DDTHH:mm:ssZ"),
                     symbol: record.comment,
                     tags: getTags()
@@ -274,7 +275,8 @@ export class XtbConverter extends AbstractConverter {
 
             if (record.type.toLocaleLowerCase() === "fee") {
 
-                // Add interest record to export.
+                // Add fee record to export. The dataSource is omitted on
+                // purpose, see the interest record above.
                 result.activities.push({
                     accountId: process.env.GHOSTFOLIO_ACCOUNT_ID,
                     comment: `XTB ${record.id} - ${record.comment}`,
@@ -283,7 +285,6 @@ export class XtbConverter extends AbstractConverter {
                     type: GhostfolioOrderType[record.type],
                     unitPrice: 0,
                     currency: process.env.XTB_ACCOUNT_CURRENCY || "EUR",
-                    dataSource: "MANUAL",
                     date: date.format("YYYY-MM-DDTHH:mm:ssZ"),
                     symbol: record.comment,
                     tags: getTags()

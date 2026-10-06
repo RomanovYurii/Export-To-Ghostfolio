@@ -3,6 +3,7 @@ import ExcelJS from "exceljs";
 import { XtbConverter } from "./xtbConverter";
 import { SecurityService } from "../securityService";
 import { GhostfolioExport } from "../models/ghostfolioExport";
+import { GhostfolioOrderType } from "../models/ghostfolioOrderType";
 import YahooFinanceServiceMock from "../testing/yahooFinanceServiceMock";
 
 describe("xtbConverter", () => {
@@ -37,6 +38,19 @@ describe("xtbConverter", () => {
       expect(actualExport).toBeTruthy();
       expect(actualExport.activities.length).toBeGreaterThan(0);
       expect(actualExport.activities.length).toBe(189);
+
+      // Fee and interest activities must not carry an explicit dataSource:
+      // Ghostfolio rejects MANUAL activities with a free-text symbol and
+      // resolves the data source for these types itself.
+      const nonInvestmentActivities = actualExport.activities
+        .filter(activity => activity.type === GhostfolioOrderType.fee || activity.type === GhostfolioOrderType.interest);
+
+      expect(nonInvestmentActivities.filter(activity => activity.type === GhostfolioOrderType.fee).length).toBeGreaterThan(0);
+      expect(nonInvestmentActivities.filter(activity => activity.type === GhostfolioOrderType.interest).length).toBeGreaterThan(0);
+
+      nonInvestmentActivities.forEach(activity => {
+        expect(activity.dataSource).toBeUndefined();
+      });
 
       done();
     }, (err: Error) => { done(err); });

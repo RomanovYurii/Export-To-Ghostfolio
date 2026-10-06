@@ -8,7 +8,9 @@ export class GhostfolioActivity {
     type: GhostfolioOrderType;
     unitPrice: number;
     currency: string;
-    dataSource: string;
+    // Optional: Ghostfolio resolves the default data source for
+    // non-investment types (FEE, INTEREST, LIABILITY) when it is omitted.
+    dataSource?: string;
     date: string;
     symbol: string;
     tags: string[];
