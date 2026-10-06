@@ -138,13 +138,16 @@ export default class GhostfolioService {
             const bearerResponse = await fetch(`${process.env.GHOSTFOLIO_URL}/api/v1/auth/anonymous`, {
                 method: "POST",
                 headers: [["Content-Type", "application/json"]],
-                body: JSON.stringify({ accessToken: process.env.GHOSTFOLIO_SECRET })
+                body: JSON.stringify({ accessToken: process.env.GHOSTFOLIO_SECRET }),
+                redirect: "manual"
             });
+
+            const rawBody = await bearerResponse.text();
 
             let bearer;
 
             try {
-                bearer = await bearerResponse.json();
+                bearer = JSON.parse(rawBody);
             }
             catch {
                 bearer = undefined;
@@ -161,10 +164,15 @@ export default class GhostfolioService {
                     hint = "Too many authentication attempts. Wait a moment and try again.";
                 }
                 else if (bearerResponse.status === 404) {
-                    hint = "Auth endpoint not found. Update your Ghostfolio instance.";
+                    hint = "Auth endpoint not found. Your Ghostfolio instance is outdated or a reverse proxy is intercepting the request.";
+                }
+                else if (bearerResponse.status >= 300 && bearerResponse.status < 400) {
+                    hint = "Unexpected redirect. Is GHOSTFOLIO_URL pointing directly at Ghostfolio?";
                 }
 
-                throw new Error(`Failed to authenticate with Ghostfolio! ${hint} (HTTP ${bearerResponse.status})`);
+                const detail = rawBody ? ` Response: ${rawBody.slice(0, 300)}` : "";
+
+                throw new Error(`Failed to authenticate with Ghostfolio! ${hint} (HTTP ${bearerResponse.status})${detail}`);
             }
 
             this.cachedBearerToken = bearer.authToken;

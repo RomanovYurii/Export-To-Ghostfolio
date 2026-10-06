@@ -11,7 +11,8 @@ describe("ghostfolioService", () => {
     return {
       ok: status >= 200 && status < 300,
       status,
-      json: () => Promise.resolve(body)
+      json: () => Promise.resolve(body),
+      text: () => Promise.resolve(typeof body === "string" ? body : JSON.stringify(body))
     } as unknown as Response;
   }
 
@@ -115,6 +116,7 @@ describe("ghostfolioService", () => {
       // Assert
       expect(err.message).toContain("Failed to authenticate with Ghostfolio");
       expect(err.message).toContain("(HTTP 404)");
+      expect(err.message).toContain("Cannot GET");
       expect(fetchSpy).toHaveBeenCalledTimes(1);
 
       done();
