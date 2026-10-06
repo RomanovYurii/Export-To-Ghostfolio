@@ -232,7 +232,7 @@ The following parameters can be given to the Docker run command.
 | `--env GHOSTFOLIO_VALIDATE=true`                  | Y        | When set to true, the tool with automatically validate the generated file against Ghostfolio.                                                                   |
 | `--env GHOSTFOLIO_IMPORT=true`                    | Y        | When set to true, the tool will try to automatically import the generated file into Ghostfolio.                                                                 |
 | `--env GHOSTFOLIO_URL=http://xxxxxxx`             | Y        | The endpoint of your **local** Ghostfolio instance. E.g. `http://192.168.1.15:3333`. **Use ONLY with a local Ghostfolio instance!**                             |
-| `--env GHOSTFOLIO_SECRET=xxxxxxx`                 | Y        | The credentials of your Ghostfolio user. Used to authenticate with the `import` API endpoint. **Use ONLY with a local Ghostfolio instance!**                    |
+| `--env GHOSTFOLIO_SECRET=xxxxxxx`                 | Y        | The **Security Token** of your Ghostfolio user (Ghostfolio > Settings, not your login password). Used to authenticate with the `import` API endpoint. **Use ONLY with a local Ghostfolio instance!**                    |
 
 [^1]: You can retrieve your Ghostfolio account ID by going to Accounts > Edit for your account and copying the Account ID field
 
@@ -355,7 +355,7 @@ There is an experimental feature (since 0.12.0) with which you can automatically
 | `--env GHOSTFOLIO_VALIDATE=true`      | When set to true, the tool with automatically validate the generated file against Ghostfolio.                                                |
 | `--env GHOSTFOLIO_IMPORT=true`        | When set to true, the tool will try to automatically import the generated file into Ghostfolio.                                              |
 | `--env GHOSTFOLIO_URL=http://xxxxxxx` | The endpoint of your **local** Ghostfolio instance. E.g. `http://192.168.1.15:3333`. **Use ONLY with a local Ghostfolio instance!**          |
-| `--env GHOSTFOLIO_SECRET=xxxxxxx`     | The credentials of your Ghostfolio user. Used to authenticate with the `import` API endpoint. **Use ONLY with a local Ghostfolio instance!** |
+| `--env GHOSTFOLIO_SECRET=xxxxxxx`     | The **Security Token** of your Ghostfolio user (Ghostfolio > Settings, not your login password). Used to authenticate with the `import` API endpoint. **Use ONLY with a local Ghostfolio instance!** |
 
 ---
 

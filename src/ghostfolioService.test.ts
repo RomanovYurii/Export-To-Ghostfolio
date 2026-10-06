@@ -114,6 +114,7 @@ describe("ghostfolioService", () => {
 
       // Assert
       expect(err.message).toContain("Failed to authenticate with Ghostfolio");
+      expect(err.message).toContain("(HTTP 404)");
       expect(fetchSpy).toHaveBeenCalledTimes(1);
 
       done();

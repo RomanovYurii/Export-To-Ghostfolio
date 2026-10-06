@@ -151,7 +151,20 @@ export default class GhostfolioService {
             }
 
             if (!bearerResponse.ok || !bearer?.authToken) {
-                throw new Error("Failed to authenticate with Ghostfolio! Check GHOSTFOLIO_URL and GHOSTFOLIO_SECRET.");
+
+                let hint = "Check GHOSTFOLIO_URL and GHOSTFOLIO_SECRET.";
+
+                if (bearerResponse.status === 403) {
+                    hint = "GHOSTFOLIO_SECRET does not match. Copy the Security Token from Ghostfolio > Settings.";
+                }
+                else if (bearerResponse.status === 429) {
+                    hint = "Too many authentication attempts. Wait a moment and try again.";
+                }
+                else if (bearerResponse.status === 404) {
+                    hint = "Auth endpoint not found. Update your Ghostfolio instance.";
+                }
+
+                throw new Error(`Failed to authenticate with Ghostfolio! ${hint} (HTTP ${bearerResponse.status})`);
             }
 
             this.cachedBearerToken = bearer.authToken;
