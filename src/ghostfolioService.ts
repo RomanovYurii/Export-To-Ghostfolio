@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import * as fs from "fs";
 
 export default class GhostfolioService {
@@ -41,6 +39,9 @@ export default class GhostfolioService {
             activities: JSON.parse(fileToValidate).activities
         }
 
+        // Make sure there is a valid bearer token before making the request.
+        await this.authenticate();
+
         // Try validation.
         const validationResult = await fetch(`${process.env.GHOSTFOLIO_URL}/api/v1/import?dryRun=true`, {
             method: "POST",
@@ -52,7 +53,7 @@ export default class GhostfolioService {
         if (validationResult.status === 401) {
 
             await this.authenticate(true);
-            return await this.validate(path, retryCount++);
+            return await this.validate(path, retryCount + 1);
         }
 
         // If status is 400, then import failed. 
@@ -62,9 +63,7 @@ export default class GhostfolioService {
             console.log(`[e] Validation failed!`);
 
             var response = await validationResult.json();
-            response.message.forEach(message => {
-                console.log(`[e]\t${message}`);
-            });
+            this.logMessages(response);
 
             return false;
         }
@@ -96,6 +95,9 @@ export default class GhostfolioService {
             activities: JSON.parse(fileToValidate).activities
         }
 
+        // Make sure there is a valid bearer token before making the request.
+        await this.authenticate();
+
         // Try import.
         const importResult = await fetch(`${process.env.GHOSTFOLIO_URL}/api/v1/import?dryRun=false`, {
             method: "POST",
@@ -107,7 +109,7 @@ export default class GhostfolioService {
         if (importResult.status === 401) {
 
             await this.authenticate(true);
-            return await this.import(path, retryCount++);
+            return await this.import(path, retryCount + 1);
         }
 
         var response = await importResult.json();
@@ -118,9 +120,7 @@ export default class GhostfolioService {
 
             console.log(`[e] Import failed!`);
 
-            response.message.forEach(message => {
-                console.log(`[e]\t${message}`);
-            });
+            this.logMessages(response);
 
             // It failed, so throw erro and stop.
             throw new Error("Automatic import failed! See the logs for more details.");
@@ -135,10 +135,35 @@ export default class GhostfolioService {
         if (!this.cachedBearerToken || refresh) {
 
             // Retrieve bearer token for authentication.
-            const bearerResponse = await fetch(`${process.env.GHOSTFOLIO_URL}/api/v1/auth/anonymous/${process.env.GHOSTFOLIO_SECRET}`);
-            const bearer = await bearerResponse.json();
+            const bearerResponse = await fetch(`${process.env.GHOSTFOLIO_URL}/api/v1/auth/anonymous`, {
+                method: "POST",
+                headers: [["Content-Type", "application/json"]],
+                body: JSON.stringify({ accessToken: process.env.GHOSTFOLIO_SECRET })
+            });
+
+            let bearer;
+
+            try {
+                bearer = await bearerResponse.json();
+            }
+            catch {
+                bearer = undefined;
+            }
+
+            if (!bearerResponse.ok || !bearer?.authToken) {
+                throw new Error("Failed to authenticate with Ghostfolio! Check GHOSTFOLIO_URL and GHOSTFOLIO_SECRET.");
+            }
+
             this.cachedBearerToken = bearer.authToken;
-            return;
         }
+    }
+
+    private logMessages(response: any): void {
+
+        const messages = Array.isArray(response?.message) ? response.message : [response?.message];
+
+        messages.forEach(message => {
+            console.log(`[e]\t${message}`);
+        });
     }
 }
