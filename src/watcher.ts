@@ -32,24 +32,33 @@ chokidar
 
         console.log(`[i] Found ${path.basename(filePath)}!`);
 
-        const fileContents = fs.readFileSync(filePath, "utf-8");
+        let converter: string;
 
-
-        // Determine file type by checking header. As the header may not be on the first line, we need to find it.
-        const lines = fileContents.split("\n");
-
-        // Find the first line that looks like a header (comma or semicolon separated with multiple values).
-        const headerLine = lines.find(line => (line.match(/[,;]/g) || []).length >= 2) || lines[0];
-        const closestMatch = matcher.closestMatch(headerLine, [...headers.keys()]);
-
-        let converterKey = closestMatch as string;
-
-        // If multiple matches were found (type would not be 'string'), pick the first.
-        if (typeof closestMatch !== "string") {
-            converterKey = closestMatch[0];
+        // Excel exports are binary and cannot be detected by their header line, so detect them by extension.
+        if (path.extname(filePath).toLocaleLowerCase() === ".xlsx") {
+            converter = "xtb";
         }
+        else {
 
-        let converter = headers.get(converterKey);
+            const fileContents = fs.readFileSync(filePath, "utf-8");
+
+
+            // Determine file type by checking header. As the header may not be on the first line, we need to find it.
+            const lines = fileContents.split("\n");
+
+            // Find the first line that looks like a header (comma or semicolon separated with multiple values).
+            const headerLine = lines.find(line => (line.match(/[,;]/g) || []).length >= 2) || lines[0];
+            const closestMatch = matcher.closestMatch(headerLine, [...headers.keys()]);
+
+            let converterKey = closestMatch as string;
+
+            // If multiple matches were found (type would not be 'string'), pick the first.
+            if (typeof closestMatch !== "string") {
+                converterKey = closestMatch[0];
+            }
+
+            converter = headers.get(converterKey);
+        }
 
         // Temporary flag to force DEGIRO V3.
         if (converter === "degiro" && `${process.env.DEGIRO_FORCE_V3}` === "true") {

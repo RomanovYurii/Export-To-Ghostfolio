@@ -186,7 +186,7 @@ Login to your Trading 212 account and create an export file (via History > Downl
 
 ### XTB
 
-Login to your XTB account and from the top bar click on "Account history", then "Cash operations". Click the "Export button". Choose the period from which you wish to export your history, select report type "Cash Operations" choose file format "csv" then click "Export Report" button.
+Login to your XTB account and from the top bar click on "Account history", then "Cash operations". Click the "Export button". Choose the period from which you wish to export your history, select report type "Cash Operations", choose file format "xlsx" (or "csv" for exports made before XTB switched to Excel) then click "Export Report" button. The tool reads the "Cash Operations" sheet from the `.xlsx` file directly, so no conversion is needed.
 
 </details>
 
@@ -207,7 +207,7 @@ To run the Docker container you need to have [Docker](https://docs.docker.com/ge
 
 ### How to use with the Dockerhub image
 
-Contrary to the locally run version of the tool, the containerized version tries to determine which file type to process by looking to the header line inside the file. So there is no need to specify which converter to use.
+Contrary to the locally run version of the tool, the containerized version tries to determine which file type to process by looking to the header line inside the file. Excel (`.xlsx`) files are recognized by their file extension. So there is no need to specify which converter to use.
 
 You can then run the image like:
 

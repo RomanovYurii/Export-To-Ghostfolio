@@ -1,7 +1,7 @@
 export class XtbRecord {
     id: number;
     type: string;
-    time: Date;
+    time: string;
     symbol: string;
     comment: string;
     amount: number;

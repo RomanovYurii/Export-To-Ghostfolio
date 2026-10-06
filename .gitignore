@@ -2,6 +2,7 @@ lib-cov
 *.seed
 *.log
 *.csv
+*.xlsx
 *.dat
 *.out
 *.pid
@@ -36,6 +37,7 @@ dist/**/*
 
 # Allow sample export files
 !samples/*-export.csv
+!samples/*-export.xlsx
 
 # Ignore Trading 212 export files (by default name: from_date_to_date_acc.csv)
 from_*.csv

@@ -1,3 +1,5 @@
+import fs from "fs";
+import ExcelJS from "exceljs";
 import { XtbConverter } from "./xtbConverter";
 import { SecurityService } from "../securityService";
 import { GhostfolioExport } from "../models/ghostfolioExport";
@@ -20,6 +22,24 @@ describe("xtbConverter", () => {
 
     // Assert
     expect(sut).toBeTruthy();
+  });
+
+  it("should process sample XLSX file", (done) => {
+
+    // Arange
+    const sut = new XtbConverter(new SecurityService(new YahooFinanceServiceMock()));
+    const inputFile = "samples/xtb-export.xlsx";
+
+    // Act
+    sut.readAndProcessFile(inputFile, (actualExport: GhostfolioExport) => {
+
+      // Assert
+      expect(actualExport).toBeTruthy();
+      expect(actualExport.activities.length).toBeGreaterThan(0);
+      expect(actualExport.activities.length).toBe(189);
+
+      done();
+    }, (err: Error) => { done(err); });
   });
 
   it("should process sample CSV file", (done) => {
@@ -95,6 +115,33 @@ describe("xtbConverter", () => {
         expect(err.message).toBe("An error occurred while parsing! Details: Invalid Record Length: columns length is 6, got 8 on line 2");
 
         done();
+      });
+    });
+
+    it("the XLSX file has no Cash Operations sheet", (done) => {
+
+      // Arrange
+      const sut = new XtbConverter(new SecurityService(new YahooFinanceServiceMock()));
+
+      const tempFileName = "tmp/testinput/xtb-nocashoperationssheet.xlsx";
+
+      // Create an XLSX file without a Cash Operations sheet.
+      const workbook = new ExcelJS.Workbook();
+      workbook.addWorksheet("Open Positions");
+
+      fs.mkdirSync("tmp/testinput", { recursive: true });
+
+      workbook.xlsx.writeFile(tempFileName).then(() => {
+
+        // Act
+        sut.readAndProcessFile(tempFileName, () => { done("Should not succeed!"); }, (err: Error) => {
+
+          // Assert
+          expect(err).toBeTruthy();
+          expect(err.message).toContain("Cash Operations");
+
+          done();
+        });
       });
     });
 
